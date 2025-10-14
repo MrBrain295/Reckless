@@ -438,7 +438,7 @@ fn search<NODE: NodeType>(
     let improving = improvement > 0;
 
     // Razoring
-    if !NODE::PV && !in_check && eval < alpha - 320 - 237 * initial_depth * initial_depth {
+    if !NODE::PV && !in_check && eval < alpha - 315 - 239 * initial_depth * initial_depth {
         return qsearch::<NonPV>(td, alpha, beta, ply);
     }
 
@@ -756,7 +756,7 @@ fn search<NODE: NodeType>(
             td.stack[ply].reduction = 0;
 
             if score > alpha && new_depth > reduced_depth {
-                new_depth += (score > best_score + 37 + 495 * depth / 128) as i32;
+                new_depth += (score > best_score + 36 + 505 * depth / 128) as i32;
                 new_depth -= (score < best_score + new_depth) as i32;
 
                 if new_depth > reduced_depth {
