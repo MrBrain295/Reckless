@@ -483,7 +483,7 @@ fn search<NODE: NodeType>(
         && !potential_singularity
         && !is_loss(beta)
     {
-        let r = 5 + depth / 3 + ((eval - beta) / 257).min(3);
+        let r = 5 + depth / 3 + ((eval - beta) / 251).min(3);
 
         td.stack[ply].conthist = std::ptr::null_mut();
         td.stack[ply].contcorrhist = std::ptr::null_mut();
@@ -685,7 +685,7 @@ fn search<NODE: NodeType>(
                 extension += (score < singular_beta - double_margin) as i32;
                 extension += (score < singular_beta - triple_margin) as i32;
 
-                if extension > 1 && depth < 14 {
+                if extension > 1 && depth < 15 {
                     depth += 1;
                 }
             } else if score >= beta && !is_decisive(score) {
