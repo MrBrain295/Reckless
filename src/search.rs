@@ -438,7 +438,7 @@ fn search<NODE: NodeType>(
     let improving = improvement > 0;
 
     // Razoring
-    if !NODE::PV && !in_check && eval < alpha - 315 - 239 * initial_depth * initial_depth {
+    if !NODE::PV && !in_check && eval < alpha - 320 - 237 * initial_depth * initial_depth {
         return qsearch::<NonPV>(td, alpha, beta, ply);
     }
 
@@ -483,7 +483,7 @@ fn search<NODE: NodeType>(
         && !potential_singularity
         && !is_loss(beta)
     {
-        let r = 5 + depth / 3 + ((eval - beta) / 251).min(3);
+        let r = 5 + depth / 3 + ((eval - beta) / 257).min(3);
 
         td.stack[ply].conthist = std::ptr::null_mut();
         td.stack[ply].contcorrhist = std::ptr::null_mut();
@@ -685,7 +685,7 @@ fn search<NODE: NodeType>(
                 extension += (score < singular_beta - double_margin) as i32;
                 extension += (score < singular_beta - triple_margin) as i32;
 
-                if extension > 1 && depth < 15 {
+                if extension > 1 && depth < 14 {
                     depth += 1;
                 }
             } else if score >= beta && !is_decisive(score) {
@@ -756,7 +756,7 @@ fn search<NODE: NodeType>(
             td.stack[ply].reduction = 0;
 
             if score > alpha && new_depth > reduced_depth {
-                new_depth += (score > best_score + 36 + 505 * depth / 128) as i32;
+                new_depth += (score > best_score + 37 + 495 * depth / 128) as i32;
                 new_depth -= (score < best_score + new_depth) as i32;
 
                 if new_depth > reduced_depth {
@@ -825,6 +825,11 @@ fn search<NODE: NodeType>(
             score =
                 -search::<NonPV>(td, -alpha - 1, -alpha, new_depth - (reduction >= 3072) as i32, !cut_node, ply + 1);
             td.stack[ply].reduction = 0;
+
+            if mv.is_quiet() && score >= beta {
+                let bonus = (155 * depth - 63).min(851);
+                update_continuation_histories(td, ply, td.stack[ply].piece, mv.to(), bonus);
+            }
         }
 
         // Principal Variation Search (PVS)
