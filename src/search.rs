@@ -698,7 +698,7 @@ fn search<NODE: NodeType>(
     let mut current_search_count = 0;
     let mut tt_move_score = Score::NONE;
 
-    while let Some(mv) = move_picker.next::<NODE>(td, skip_quiets, ply) {
+    while let Some(mv) = move_picker.next::<NODE>(td, false, ply) {
         if mv == td.stack[ply].excluded {
             continue;
         }
@@ -713,6 +713,10 @@ fn search<NODE: NodeType>(
 
         let is_quiet = mv.is_quiet();
         let gives_check = td.board.is_direct_check(mv);
+
+        if skip_quiets && is_quiet && !gives_check {
+            continue;
+        }
 
         let history = if is_quiet {
             td.quiet_history.get(td.board.all_threats(), stm, mv) + td.conthist(ply, 1, mv) + td.conthist(ply, 2, mv)
@@ -770,7 +774,7 @@ fn search<NODE: NodeType>(
                 (-8 * depth * depth - 36 * depth - 32 * history / 1024 + 11).min(0)
             };
 
-            if !gives_check && !td.board.see(mv, threshold) {
+            if !td.board.see(mv, threshold) {
                 continue;
             }
         }
