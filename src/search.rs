@@ -712,6 +712,7 @@ fn search<NODE: NodeType>(
         td.stack[ply].move_count = move_count;
 
         let is_quiet = mv.is_quiet();
+        let gives_check = td.board.is_direct_check(mv);
 
         let history = if is_quiet {
             td.quiet_history.get(td.board.all_threats(), stm, mv) + td.conthist(ply, 1, mv) + td.conthist(ply, 2, mv)
@@ -723,7 +724,7 @@ fn search<NODE: NodeType>(
         if !NODE::ROOT && !is_loss(best_score) {
             // Late Move Pruning (LMP)
             if !in_check
-                && !td.board.is_direct_check(mv)
+                && !gives_check
                 && is_quiet
                 && move_count >= (3006 + 70 * improvement / 16 + 1455 * depth * depth + 68 * history / 1024) / 1024
             {
@@ -739,7 +740,7 @@ fn search<NODE: NodeType>(
                 + 560 * correction_value.abs() / 1024
                 - 146;
 
-            if !in_check && is_quiet && depth < 15 && futility_value <= alpha && !td.board.is_direct_check(mv) {
+            if !in_check && is_quiet && depth < 15 && futility_value <= alpha && !gives_check {
                 if !is_decisive(best_score) && best_score < futility_value {
                     best_score = futility_value;
                 }
@@ -754,7 +755,7 @@ fn search<NODE: NodeType>(
                 && depth < 11
                 && move_picker.stage() == Stage::BadNoisy
                 && noisy_futility_value <= alpha
-                && !td.board.is_direct_check(mv)
+                && !gives_check
             {
                 if !is_decisive(best_score) && best_score < noisy_futility_value {
                     best_score = noisy_futility_value;
@@ -769,7 +770,7 @@ fn search<NODE: NodeType>(
                 (-8 * depth * depth - 36 * depth - 32 * history / 1024 + 11).min(0)
             };
 
-            if !td.board.see(mv, threshold) {
+            if !gives_check && !td.board.see(mv, threshold) {
                 continue;
             }
         }
